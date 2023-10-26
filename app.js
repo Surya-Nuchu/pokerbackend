@@ -137,7 +137,7 @@ app.get('/initplayer', async (req, res) => {
 
     // Step 3: Save the updated game to the database
     await game.save();
-    if((game.players.length+1) > 1) {
+    if((game.players.length) > 1) {
       const result = await Game.updateOne({ _id: hostId }, { $set: { status: 'ongoing' } });
     }
     // Step 4: Return the ID of the created player to the user
