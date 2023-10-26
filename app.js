@@ -84,7 +84,7 @@ app.post('/inithost', async (req, res) => {
 
 });
 
-app.get('/startgame', async (req, res) => {
+const startGame = async(req, res)=>{
   try {
     const hostID = req.query.hostId;
 
@@ -102,8 +102,11 @@ app.get('/startgame', async (req, res) => {
     console.error('Error starting the game:', error.message);
     res.status(500).json({ code: 500, message: 'Internal Server Error' });
   }
-});
+}
 
+app.get('/startgame', async (req, res) => {
+    startGame(req, res);
+});
 
 app.get('/initplayer', async (req, res) => {
 
@@ -138,7 +141,9 @@ app.get('/initplayer', async (req, res) => {
 
     // Step 3: Save the updated game to the database
     await game.save();
-
+    if((game.players.length+1) > 1) {
+      startGame(req, res);
+    }
     // Step 4: Return the ID of the created player to the user
     res.status(200).json({ code: 200, playerId: newPlayer.userID });
   } catch (error) {
@@ -151,7 +156,7 @@ app.get('/initplayer', async (req, res) => {
 app.post('/updateplayer', async (req, res) => {
   try {
     const result = await Game.updateOne(
-      { hostID: req.body.hostId, 'players.userID': req.body.playerId },
+      { _id: req.body.hostId, 'players.userID': req.body.playerId },
       { $set: { 'players.$': req.body.playerInfo } }
     );
 
