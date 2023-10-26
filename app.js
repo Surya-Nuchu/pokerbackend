@@ -180,7 +180,7 @@ io.on('connection', (socket) => {
       let hostID = "host123";
 
       // Find the game with the specified hostID
-      const gameData = await Game.findOne({ hostID });
+      const gameData = await Game.findOne({ _id: hostID });
 
       if (gameData) {
         // Emit the game data to the client
