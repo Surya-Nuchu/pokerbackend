@@ -84,12 +84,12 @@ app.post('/inithost', async (req, res) => {
 
 });
 
-const startGame = async(req, res)=>{
+app.get('/startgame', async (req, res) => {
   try {
-    const hostID = req.query.hostId;
+    const hostId = req.query.hostId;
 
     // Use $set to update only the 'status' field to 'started'
-    const result = await Game.updateOne({ _id: hostID }, { $set: { status: 'ongoing' } });
+    const result = await Game.updateOne({ _id: hostId }, { $set: { status: 'ongoing' } });
 
     if (result.nModified === 0) {
       // If nModified is 0, it means the document with the given hostID was not found
@@ -102,10 +102,6 @@ const startGame = async(req, res)=>{
     console.error('Error starting the game:', error.message);
     res.status(500).json({ code: 500, message: 'Internal Server Error' });
   }
-}
-
-app.get('/startgame', async (req, res) => {
-    startGame(req, res);
 });
 
 app.get('/initplayer', async (req, res) => {
@@ -142,7 +138,7 @@ app.get('/initplayer', async (req, res) => {
     // Step 3: Save the updated game to the database
     await game.save();
     if((game.players.length+1) > 1) {
-      startGame(req, res);
+      const result = await Game.updateOne({ _id: hostId }, { $set: { status: 'ongoing' } });
     }
     // Step 4: Return the ID of the created player to the user
     res.status(200).json({ code: 200, playerId: newPlayer.userID });
