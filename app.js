@@ -76,6 +76,7 @@ app.post('/inithost', async (req, res) => {
   try {
     // Save the game to MongoDB
     const savedGame = await Game.updateOne({ _id: game.hostID }, { $set: game }, { upsert: true });
+    console.log({ code: 200, 'body': JSON.stringify(savedGame) });
     res.send({ code: 200, 'body': JSON.stringify(savedGame) });
   } catch (error) {
     console.error('Error saving game event:', error.message);
@@ -128,7 +129,7 @@ app.get('/initplayer', async (req, res) => {
     // Step 2: Add a new player to the found game
     const newPlayer = {
       userID: uuid.v4(), // You can generate a unique user ID here
-      active: true,
+      active: false,
       bet: 0,
       actions: []
     };
