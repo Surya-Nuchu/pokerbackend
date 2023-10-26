@@ -128,6 +128,7 @@ app.get('/initplayer', async (req, res) => {
 
     // Step 2: Add a new player to the found game
     const newPlayer = {
+      name: "player " + (game.players.length+1),
       userID: uuid.v4(), // You can generate a unique user ID here
       active: false,
       bet: 0,
