@@ -68,6 +68,7 @@ app.post('/inithost', async (req, res) => {
       level: req.body.level,
       hostName: req.body.hostName,
       hostID: req.body.hostID,
+      activePlayerId:0,
       players: [
       ]
     }
@@ -128,11 +129,10 @@ app.get('/initplayer', async (req, res) => {
 
     // Step 2: Add a new player to the found game
     const newPlayer = {
-      name: "player " + (game.players.length+1),
+      index: game.players.length + 1,
       userID: uuid.v4(), // You can generate a unique user ID here
-      active: false,
-      bet: 0,
-      actions: []
+      bet: 10,
+      lastAction: ""
     };
 
     game.players.push(newPlayer); // Add the new player to the players array
@@ -140,13 +140,57 @@ app.get('/initplayer', async (req, res) => {
     // Step 3: Save the updated game to the database
     await game.save();
     if((game.players.length) > 1) {
-      const result = await Game.updateOne({ _id: hostId }, { $set: { status: 'ongoing' } });
+      // if(game.activePlayerId)
+      game.players[game.activePlayerId].active = true;
+      const result = await Game.updateOne({ _id: hostId }, { $set: game });
     }
+
     // Step 4: Return the ID of the created player to the user
     res.status(200).json({ code: 200, playerId: newPlayer.userID });
   } catch (error) {
     console.error('Error creating player:', error.message);
     res.status(500).json({ code: 500, message: 'Internal Server Error' });
+  }
+
+});
+
+app.get('/updateplayeraction', async (req, res) => {
+
+  const hostId = req.query.hostId;
+
+  try {
+    const game = await Game.findOne({ _id: req.query.hostId });
+
+    let player = game.players.filter(p => p.userID == req.query.userId)[0];
+    
+    if(req.query.action == "Fold") {
+      player.isPlaying = false;
+      player.lastAction = "Fold";
+      await Game.updateOne(
+        { _id: req.body.hostId, 'players.userID': req.body.playerId },
+        { $set: { 'players.$': player } }
+      );
+    } else if(req.query.action == "Raise") {
+      player.lastAction = "Raise";
+      await Game.updateOne(
+        { _id: req.body.hostId, 'players.userID': req.body.playerId },
+        { $set: { 'players.$': player } }
+      );
+    } else if(req.query.action == "Check") {
+      player.lastAction = "Check";
+      await Game.updateOne(
+        { _id: req.body.hostId, 'players.userID': req.body.playerId },
+        { $set: { 'players.$': player } }
+      );
+    }
+
+    game.activePlayerId = (game.activePlayerId + 1)%game.players.length;
+    game.players[activePlayerId].active = true;
+    await game.save();
+    res.status(200).json({ code: 200, message: 'updated player information'});
+  } catch(error){
+    console.error('Error while updating player action:', error.message);
+    res.status(500).json({ code: 500, message: 'Error while updating player action' });
   }
 
 });
@@ -167,7 +211,7 @@ app.post('/updateplayer', async (req, res) => {
     console.error('Error updating player information:', error.message);
     return res.status(500).json({ code: 500, message: 'Error updating player information' });
   }
-})
+});
 
 // socket
 const SOCKET_PORT = process.env.SOCKET_PORT || 8085;
