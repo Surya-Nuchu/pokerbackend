@@ -177,7 +177,7 @@ app.get('/updateplayeraction', async (req, res) => {
     do{
       if(game.activePlayerId == ( game.players.length-1))
         game.level = game.level + 1;
-      if(game.level == 4 && i<4) {
+      if(game.level == 4 || i<4) {
         game.status = "completed";
         return res.status(200).json({ code: 200, message: 'Game is completed'});
       } 
