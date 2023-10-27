@@ -182,7 +182,9 @@ app.get('/updateplayeraction', async (req, res) => {
       } 
       game.activePlayerId = (game.activePlayerId + 1)%game.players.length;
     } while(!game.players[game.activePlayerId].isPlaying)
-    game.players[activePlayerId].active = true;
+    game.players[player.index] = player;
+    game.players[game.activePlayerId].active = true;
+
     await game.save();
     res.status(200).json({ code: 200, message: 'updated player information'});
   } catch(error){
