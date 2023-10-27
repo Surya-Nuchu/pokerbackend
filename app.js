@@ -146,6 +146,7 @@ app.get('/initplayer', async (req, res) => {
       const result = await Game.updateOne({ _id: hostId }, { $set: game });
     }
 
+    console.log({ code: 200, playerId: newPlayer.userID })
     // Step 4: Return the ID of the created player to the user
     res.status(200).json({ code: 200, playerId: newPlayer.userID });
   } catch (error) {
@@ -177,9 +178,6 @@ app.get('/updateplayeraction', async (req, res) => {
     do{
       if(game.activePlayerId == ( game.players.length-1)){
         game.level = game.level + 1;
-        for(let player in game.players){
-          player.lastAction = ""
-        }
       }
       if(game.level == 4 || (i == game.players.length)) {
         game.status = "completed";
