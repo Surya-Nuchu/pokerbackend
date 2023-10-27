@@ -167,18 +167,19 @@ app.get('/updateplayeraction', async (req, res) => {
     if(req.query.action == "Fold") {
       player.isPlaying = false;
       player.lastAction = "Fold";
-      player.active = false;
     } else if(req.query.action == "Raise") {
       player.lastAction = "Raise";
     } else if(req.query.action == "Check") {
       player.lastAction = "Check";
     }
+    player.active = false;
     let i=0; 
     do{
       if(game.activePlayerId == ( game.players.length-1))
         game.level = game.level + 1;
       if(game.level == 4 || (i == game.players.length)) {
         game.status = "completed";
+        game.save();
         return res.status(200).json({ code: 200, message: 'Game is completed'});
       } 
       game.activePlayerId = (game.activePlayerId + 1)%game.players.length;
