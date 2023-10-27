@@ -170,6 +170,7 @@ app.get('/updateplayeraction', async (req, res) => {
       player.lastAction = "Fold";
     } else if(req.query.action == "Raise") {
       player.lastAction = "Raise";
+      player.bet = player.bet + 10;
     } else if(req.query.action == "Check") {
       player.lastAction = "Check";
     }
@@ -192,6 +193,7 @@ app.get('/updateplayeraction', async (req, res) => {
     game.players[game.activePlayerId].active = true;
 
     await game.save();
+    console.log({ code: 200, message: 'updated player information'});
     res.status(200).json({ code: 200, message: 'updated player information'});
   } catch(error){
     console.error('Error while updating player action:', error.message);
