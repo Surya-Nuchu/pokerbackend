@@ -166,6 +166,7 @@ app.get('/updateplayeraction', async (req, res) => {
     let player = game.players.filter(p => p.userID == req.query.userId)[0];
     
     if(req.query.action == "Fold") {
+      game.status = "completed";
       player.isPlaying = false;
       player.lastAction = "Fold";
     } else if(req.query.action == "Raise") {
