@@ -175,8 +175,12 @@ app.get('/updateplayeraction', async (req, res) => {
     player.active = false;
     let i=0; 
     do{
-      if(game.activePlayerId == ( game.players.length-1))
+      if(game.activePlayerId == ( game.players.length-1)){
         game.level = game.level + 1;
+        for(let player in game.players){
+          player.lastAction = ""
+        }
+      }
       if(game.level == 4 || (i == game.players.length)) {
         game.status = "completed";
         game.save();
