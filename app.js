@@ -129,7 +129,7 @@ app.get('/initplayer', async (req, res) => {
 
     // Step 2: Add a new player to the found game
     const newPlayer = {
-      index: game.players.length + 1,
+      index: game.players.length,
       userID: uuid.v4(), // You can generate a unique user ID here
       bet: 10,
       lastAction: ""
@@ -142,6 +142,7 @@ app.get('/initplayer', async (req, res) => {
     if((game.players.length) > 1) {
       // if(game.activePlayerId)
       game.players[game.activePlayerId].active = true;
+      game.status = "ongoing";
       const result = await Game.updateOne({ _id: hostId }, { $set: game });
     }
 
@@ -166,25 +167,21 @@ app.get('/updateplayeraction', async (req, res) => {
     if(req.query.action == "Fold") {
       player.isPlaying = false;
       player.lastAction = "Fold";
-      await Game.updateOne(
-        { _id: req.body.hostId, 'players.userID': req.body.playerId },
-        { $set: { 'players.$': player } }
-      );
     } else if(req.query.action == "Raise") {
       player.lastAction = "Raise";
-      await Game.updateOne(
-        { _id: req.body.hostId, 'players.userID': req.body.playerId },
-        { $set: { 'players.$': player } }
-      );
     } else if(req.query.action == "Check") {
       player.lastAction = "Check";
-      await Game.updateOne(
-        { _id: req.body.hostId, 'players.userID': req.body.playerId },
-        { $set: { 'players.$': player } }
-      );
     }
 
-    game.activePlayerId = (game.activePlayerId + 1)%game.players.length;
+    do{
+      if(game.activePlayerId == game.players.length)
+        game.level = game.level + 1;
+      if(game.level == 4) {
+        game.status = "completed";
+        return res.status(200).json({ code: 200, message: 'Game is completed'});
+      } 
+      game.activePlayerId = (game.activePlayerId + 1)%game.players.length;
+    } while(!game.players[game.activePlayerId].isPlaying)
     game.players[activePlayerId].active = true;
     await game.save();
     res.status(200).json({ code: 200, message: 'updated player information'});
