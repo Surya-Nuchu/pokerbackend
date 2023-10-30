@@ -57,7 +57,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/', async (req, res) => {
-  res.send({ 'body': 'servre is up and running!!!' });
+  res.send({ 'body': 'Server is up and running!!!' });
 });
 
 app.post('/inithost', async (req, res) => {
@@ -219,6 +219,32 @@ app.post('/updateplayer', async (req, res) => {
     console.error('Error updating player information:', error.message);
     return res.status(500).json({ code: 500, message: 'Error updating player information' });
   }
+});
+
+app.get('/getupdate', async (req, res) => {
+
+  let hostId = req.query.hostId;
+  if(hostId == ''){
+    return res.status(404).json({ code: 404, message: 'Host informatin is not found' }); 
+  }
+
+  try {
+    // Find the game with the specified hostID
+    const gameData = await Game.findOne({ _id: hostId });
+
+    if (gameData) {
+     
+      return res.status(200).json({ code: 200, gameData });
+
+    } else {
+      console.log('No game data found for the specified hostID');
+      return res.status(404).json({ code: 404, message: 'No game data found for the specified hostID' }); 
+    }
+  } catch (error) {
+    console.error('Error in getting the game event:', error.message);
+    return res.status(404).json({ code: 404, message: 'Error in getting the game event:' }); 
+  }
+
 });
 
 // socket
